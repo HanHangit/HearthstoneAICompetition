@@ -20,6 +20,7 @@ using SabberStoneCore.Enums;
 using SabberStoneCoreAi.POGame;
 using SabberStoneCoreAi.Agent.ExampleAgents;
 using SabberStoneCoreAi.Agent;
+using SabberStoneCoreAi.src.Agent;
 
 namespace SabberStoneCoreAi
 {
@@ -33,26 +34,27 @@ namespace SabberStoneCoreAi
 			var gameConfig = new GameConfig()
 			{
 				StartPlayer = 1,
-				Player1HeroClass = CardClass.MAGE,
+				Player1HeroClass = CardClass.DRUID,
 				Player2HeroClass = CardClass.MAGE,
 				FillDecks = true,
 				Shuffle = true,
-				Logging = false
+				Logging = false,
+				History = true
 			};
 
 			Console.WriteLine("Setup POGameHandler");
-			AbstractAgent player1 = new GreedyAgent();
-			AbstractAgent player2 = new MyAgent();
-			var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws:false);
+			AbstractAgent player1 = new MCTSAgent_01();
+			AbstractAgent player2 = new GreedyAgent();
+			var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws: false);
 
 			Console.WriteLine("Simulate Games");
-			//gameHandler.PlayGame();
-			gameHandler.PlayGames(nr_of_games:1, addResultToGameStats:true, debug:false);
+			gameHandler.PlayGame(debug: true);
+			//gameHandler.PlayGames(nr_of_games:10, addResultToGameStats:true, debug:false);
 			GameStats gameStats = gameHandler.getGameStats();
+			
 
 			gameStats.printResults();
 
-			Console.WriteLine("Test successful");
 			Console.ReadLine();
 		}
 	}

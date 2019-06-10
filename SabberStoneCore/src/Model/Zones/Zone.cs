@@ -142,14 +142,47 @@ namespace SabberStoneCore.Model.Zones
 		public string FullPrint()
 		{
 			var str = new StringBuilder();
-			str.Append($"{this}|");
+			str.AppendLine($"{this}|");
+
+			var strZone = new StringBuilder();
+			var strmStats = new StringBuilder();
+			var strName = new StringBuilder();
+			var strName2 = new StringBuilder();
+			int maxLength = 0;
+			int step = 25;
 			foreach (T p in this)
 			{
+				maxLength += step;
 				var m = p as Minion;
 				var w = p as Weapon;
 				string mStr = m != null ? $"[{m.AttackDamage}/{m.Health}]" : (w != null ? $"[{w.AttackDamage}/{w.Durability}]" : "");
-				str.Append($"[P{p.ZonePosition}]{mStr}[C{p.Cost}]{p}|");
+				strZone.Append($"[P{p.ZonePosition}]");
+				strmStats.Append($"{mStr}[C{p.Cost}]");
+
+				string name = $"{p}";
+				string name2 = "";
+				if (name.Length > maxLength)
+				{
+					name2 = name.Substring(maxLength - 1);
+					name = name.Substring(maxLength - step, maxLength);
+				}
+				strName.Append(name);
+				strName2.Append(name2);
+
+				for (int i = strZone.Length; i < maxLength; i++)
+					strZone.Append(" ");
+				for (int i = strmStats.Length; i < maxLength; i++)
+					strmStats.Append(" ");
+				for (int i = strName.Length; i < maxLength; i++)
+					strName.Append(" ");
+				for (int i = strName2.Length; i < maxLength; i++)
+					strName2.Append(" ");
+				//str.Append($"[P{p.ZonePosition}]{mStr}[C{p.Cost}]{p}|");
 			}
+			str.AppendLine(strZone.ToString());
+			str.AppendLine(strmStats.ToString());
+			str.AppendLine(strName.ToString());
+			str.AppendLine(strName2.ToString());
 			return str.ToString();
 		}
 
@@ -229,7 +262,7 @@ namespace SabberStoneCore.Model.Zones
 			_entities.Add(entity);
 			entity.Zone = this;
 			if (Game.History)
-				entity[GameTag.ZONE] = (int) Type;
+				entity[GameTag.ZONE] = (int)Type;
 		}
 
 		public override bool Any(Func<IPlayable, bool> predicate)
@@ -252,7 +285,7 @@ namespace SabberStoneCore.Model.Zones
 	/// Base implementation of zones which have a maximum size.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public abstract class LimitedZone<T> : Zone<T> where T: IPlayable
+	public abstract class LimitedZone<T> : Zone<T> where T : IPlayable
 	{
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		protected readonly T[] _entities;
@@ -390,7 +423,7 @@ namespace SabberStoneCore.Model.Zones
 
 		public ReadOnlySpan<T> GetSpan()
 		{
-			var span = new ReadOnlySpan<T>( _entities);
+			var span = new ReadOnlySpan<T>(_entities);
 			return span.Slice(0, _count);
 		}
 
