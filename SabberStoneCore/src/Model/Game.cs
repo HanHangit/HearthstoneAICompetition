@@ -1190,6 +1190,8 @@ namespace SabberStoneCore.Model
 				BlockType = block,
 				Text = text
 			});
+
+			Console.WriteLine(Logs.Last().Text);
 		}
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -1218,13 +1220,34 @@ namespace SabberStoneCore.Model
 		public string FullPrint()
 		{
 			var str = new StringBuilder();
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine(Player1.RemainingMana);
+			Console.WriteLine(Player1.HandZone.FullPrint());
 			str.AppendLine(Player1.HandZone.FullPrint());
+
+
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine(Player1.Hero.FullPrint());
 			str.AppendLine(Player1.Hero.FullPrint());
+
+			Console.ForegroundColor = ConsoleColor.Blue;
+			Console.WriteLine(Player1.BoardZone.FullPrint());
+			Console.WriteLine(Player2.BoardZone.FullPrint());
 			str.AppendLine(Player1.BoardZone.FullPrint());
 			str.AppendLine(Player2.BoardZone.FullPrint());
+
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine(Player2.Hero.FullPrint());
 			str.AppendLine(Player2.Hero.FullPrint());
+
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine(Player2.HandZone.FullPrint());
 			str.AppendLine(Player2.HandZone.FullPrint());
-			return str.ToString();
+			Console.WriteLine(Player2.RemainingMana);
+
+
+			Console.ResetColor();
+			return "";
 		}
 		
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
