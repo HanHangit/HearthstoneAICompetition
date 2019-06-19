@@ -35,10 +35,10 @@ namespace SabberStoneCoreAi
 			var gameConfig = new GameConfig()
 			{
 				StartPlayer = 1,
-				Player1HeroClass = CardClass.MAGE,
-				Player2HeroClass = CardClass.MAGE,
-				Player1Deck = Decks.RenoKazakusMage,
-				Player2Deck = Decks.RenoKazakusMage,
+				Player1HeroClass = CardClass.SHAMAN,
+				Player2HeroClass = CardClass.SHAMAN,
+				Player1Deck = Decks.MidrangeJadeShaman,
+				Player2Deck = Decks.MidrangeJadeShaman,
 				FillDecks = true,
 				Shuffle = true,
 				Logging = false,
@@ -46,8 +46,8 @@ namespace SabberStoneCoreAi
 			};
 
 			Console.WriteLine("Setup POGameHandler");
-			AbstractAgent player1 = new HeuristicBot();
-			AbstractAgent player2 = new GreedyAgent();
+			AbstractAgent player1 = new GreedyAgent();
+			AbstractAgent player2 = new HeuristicBot();
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws: false);
 
 			Console.WriteLine("Simulate Games");

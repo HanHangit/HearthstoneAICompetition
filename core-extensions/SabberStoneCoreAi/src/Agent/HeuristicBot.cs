@@ -1,4 +1,5 @@
-﻿using SabberStoneCore.Model.Entities;
+﻿using SabberStoneCore.Model;
+using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using SabberStoneCoreAi.Agent;
 using SabberStoneCoreAi.POGame;
@@ -73,6 +74,8 @@ namespace SabberStoneCoreAi.src.Agent
 			result -= MinionAttackOnBoard(enemy) * Consts.EnemyMinionAttack;
 			result -= MinionHealthOnBoard(enemy) * Consts.EnemyMinionHealth;
 
+			result += CanDefeatEnemyHeroWithMinions(player, enemy, true) ? 10000 : 0;
+
 			return result;
 		}
 
@@ -94,6 +97,54 @@ namespace SabberStoneCoreAi.src.Agent
 				result += item.Health;
 
 			return result;
+		}
+
+		public bool CanDefeatEnemyHeroWithMinions(Controller player, Controller enemy, bool withSpell = true)
+		{
+			var damagePoints = 0;
+			if (withSpell)
+				damagePoints += MaxSpellDamage(player, enemy);
+			foreach (var item in player.BoardZone)
+			{
+				if (!item.CantAttackHeroes)
+				{
+					damagePoints += item.AttackDamage;
+					if (damagePoints >= enemy.Hero.Health)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public int MaxSpellDamage(Controller player, Controller enemy)
+		{
+			var playerMana = player.RemainingMana;
+			var spellCards = new List<Card>();
+
+			foreach (var item in player.HandZone)
+			{
+				if (item.Card.Type == SabberStoneCore.Enums.CardType.SPELL && item.Card.ATK > 0)
+				{
+					spellCards.Add(item.Card);
+				}
+			}
+			spellCards = spellCards.OrderByDescending(x => x.ATK).ToList();
+
+			var cost = 0;
+			var damage = 0;
+
+			for (int i = 0; i < spellCards.Count; i++)
+			{
+				if (spellCards[i].Cost <= playerMana - cost)
+				{
+					cost += spellCards[i].Cost;
+					damage += spellCards[i].ATK;
+				}
+			}
+
+			return damage;
 		}
 
 		#endregion

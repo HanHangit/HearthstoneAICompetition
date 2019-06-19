@@ -51,11 +51,11 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			List<PlayerTask> playerTasks = player.Options();
 			var validOpts = Game.Simulate(playerTasks).Where(x => x.Value != null).ToList();
 
-			if(validOpts.Count() > 1)
-			{
-				PlayerTask t = playerTasks.Find(x => x.PlayerTaskType == PlayerTaskType.END_TURN);
-				validOpts.RemoveAll(n => n.Key == t);
-			}
+			//if(validOpts.Count() > 1)
+			//{
+			//	PlayerTask t = playerTasks.Find(x => x.PlayerTaskType == PlayerTaskType.END_TURN);
+			//	validOpts.RemoveAll(n => n.Key == t);
+			//}
 
 			foreach (KeyValuePair<PlayerTask, POGame.POGame> item in validOpts)
 			{
@@ -74,39 +74,45 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			List<PlayerTask> playerTasks = Game.CurrentPlayer.Options();
 			List<(PlayerTask, float)> tasks = new List<(PlayerTask, float)>();
 
-			foreach (var item in playerTasks)
-			{
-				tasks.Add((item, ScoreTask(item)));
-			}
+			var simGames = Game.Simulate(playerTasks).Where(x => x.Value != null).ToList();
+			simGames.OrderByDescending(x => ScoreGame(x.Value, Game.CurrentPlayer.PlayerId));
 
-			var res = tasks.OrderByDescending(x => x.Item2);
-
-			Game.Process(res.First().Item1);
+			Game = simGames.First().Value;
 		}
 
-		private float ScoreTask(PlayerTask task)
+		public static float ScoreGame(POGame.POGame game, int playerId)
 		{
-			float result = rnd.Next(100);
+			float result = 0;
+			Controller player = game.CurrentPlayer.PlayerId == playerId ? game.CurrentPlayer : game.CurrentOpponent;
+			Controller enemy = game.CurrentPlayer.PlayerId == playerId ? game.CurrentOpponent : game.CurrentPlayer;
 
-			//if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK)
-			//{
-			//	result += rnd.Next(1, 5);
+			result += player.Hero.Health * Consts.PlayerHeroHealth;
+			result -= enemy.Hero.Health * Consts.EnemyHeroHealth;
 
-			//	if (task.Target.Health <= task.Source.Card.ATK)
-			//	{
-			//		result += 10;
-			//		if (task.Source.Card.Health > task.Target.AttackDamage)
-			//			result += 30;
-			//	}
-			//}
+			result += MinionAttackOnBoard(player) * Consts.PlayerMinionAttack;
+			result += MinionHealthOnBoard(player) * Consts.PlayerMinionHealth;
+			result -= MinionAttackOnBoard(enemy) * Consts.EnemyMinionAttack;
+			result -= MinionHealthOnBoard(enemy) * Consts.EnemyMinionHealth;
 
-			//if (task.PlayerTaskType == PlayerTaskType.PLAY_CARD)
-			//{
-			//	result += rnd.Next(1, 3);
-			//}
+			return result;
+		}
 
-			if (task.PlayerTaskType == PlayerTaskType.END_TURN)
-				result += -1000;
+		private static int MinionAttackOnBoard(Controller ctrl)
+		{
+			int result = 0;
+
+			foreach (var item in ctrl.BoardZone)
+				result += item.AttackDamage;
+
+			return result;
+		}
+
+		private static int MinionHealthOnBoard(Controller ctrl)
+		{
+			int result = 0;
+
+			foreach (var item in ctrl.BoardZone)
+				result += item.Health;
 
 			return result;
 		}

@@ -92,13 +92,16 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			double result = 0;
 			var simNode = new Node(node);
 			float wins = 0;
+			int maxRounds = 15;
+			int round = 0;
 
 			for (int i = 0; i < NUM_GAMES; i++)
 			{
 				simNode = new Node(node);
 
-				while (simNode.State.Game.State != SabberStoneCore.Enums.State.COMPLETE)
+				while (simNode.State.Game.State != SabberStoneCore.Enums.State.COMPLETE && round <= maxRounds)
 				{
+					round++;
 					try
 					{
 						simNode.State.RandomPlay();
@@ -119,6 +122,16 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 					wins++;
 				}
 			}
+
+			Controller player = simNode.State.Game.CurrentPlayer.PlayerId == playerID ? simNode.State.Game.CurrentPlayer : simNode.State.Game.CurrentOpponent;
+			Controller enemy = simNode.State.Game.CurrentPlayer.PlayerId == playerID ? simNode.State.Game.CurrentOpponent : simNode.State.Game.CurrentPlayer;
+
+			float playerScore = State.ScoreGame(simNode.State.Game, playerID);
+			float enemyScore = State.ScoreGame(simNode.State.Game, enemy.PlayerId);
+
+			wins = playerScore - enemyScore;
+
+
 			result = wins;
 
 			return result;
