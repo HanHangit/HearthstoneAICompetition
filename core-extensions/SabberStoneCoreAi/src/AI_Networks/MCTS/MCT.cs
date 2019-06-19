@@ -46,9 +46,13 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			}
 
 			var bestMoves = rootNode.Children.OrderByDescending(n => n.State.WinScore).ToList();
+			//if(bestMoves.Count > 1)
+			//{
+			//	bestMoves.RemoveAll(x => x.State.LastMove.PlayerTaskType == PlayerTaskType.END_TURN);
+			//}
 			Console.ForegroundColor = ConsoleColor.Cyan;
 			foreach (Node item in bestMoves)
-				Console.WriteLine($"[{item.State.WinScore}] - {item.State.LastMoves.First()}");
+				Console.WriteLine($"[{item.State.VisitCount}] - {item.State.LastMoves.First()}");
 			Console.ResetColor();
 
 			//Console.ReadLine();
@@ -95,14 +99,6 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 				while (simNode.State.Game.State != SabberStoneCore.Enums.State.COMPLETE)
 				{
-					//if (simNode.State.Game.CurrentPlayer.PlayerId != playerID)
-					//{
-					//	foreach (var item in simNode.State.Game.CurrentPlayer.HandZone)
-					//	{
-					//		item.Card = Decks.RenoKazakusMage[rnd.Next(Decks.RenoKazakusMage.Count)];
-					//	}
-					//}
-
 					try
 					{
 						simNode.State.RandomPlay();
@@ -119,21 +115,6 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 				}
 			}
 			result = wins;
-
-			Controller simEnemy = simNode.State.Game.CurrentPlayer.PlayerId == playerID ? simNode.State.Game.CurrentOpponent : simNode.State.Game.CurrentPlayer;
-			Controller simPlayer = simNode.State.Game.CurrentPlayer.PlayerId == playerID ? simNode.State.Game.CurrentPlayer : simNode.State.Game.CurrentOpponent;
-			//result += simEnemy.Hero.Health - simPlayer.Hero.Health;
-
-			//if(simEnemy.BoardZone.Count == 0)
-			//	result += 10000;
-
-			//foreach (var item in simPlayer.BoardZone)
-			//	result += item.Damage;
-
-			//result += (simPlayer.Hero.Health - simEnemy.Hero.Health) * 1000;
-
-
-
 
 			return result;
 		}

@@ -74,29 +74,29 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 			var res = tasks.OrderByDescending(x => x.Item2);
 
-			Game.Process(playerTasks[rnd.Next(playerTasks.Count)]/*res.First().Item1*/);
+			Game.Process(res.First().Item1);
 		}
 
 		private float ScoreTask(PlayerTask task)
 		{
-			float result = 0;
+			float result = rnd.Next(100);
 
-			if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK)
-			{
-				result += rnd.Next(1, 5);
+			//if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK)
+			//{
+			//	result += rnd.Next(1, 5);
 
-				if (task.Target.Health <= task.Source.Card.ATK)
-				{
-					result += 10;
-					if (task.Source.Card.Health > task.Target.AttackDamage)
-						result += 30;
-				}
-			}
+			//	if (task.Target.Health <= task.Source.Card.ATK)
+			//	{
+			//		result += 10;
+			//		if (task.Source.Card.Health > task.Target.AttackDamage)
+			//			result += 30;
+			//	}
+			//}
 
-			if (task.PlayerTaskType == PlayerTaskType.PLAY_CARD)
-			{
-				result += rnd.Next(1, 3);
-			}
+			//if (task.PlayerTaskType == PlayerTaskType.PLAY_CARD)
+			//{
+			//	result += rnd.Next(1, 3);
+			//}
 
 			if (task.PlayerTaskType == PlayerTaskType.END_TURN)
 				result += -1000;
