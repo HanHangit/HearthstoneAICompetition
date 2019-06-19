@@ -1,4 +1,5 @@
-﻿using SabberStoneCore.Tasks.PlayerTasks;
+﻿using SabberStoneCore.Model.Entities;
+using SabberStoneCore.Tasks.PlayerTasks;
 using SabberStoneCoreAi.Agent;
 using SabberStoneCoreAi.POGame;
 using System;
@@ -12,10 +13,12 @@ namespace SabberStoneCoreAi.src.Agent
 	{
 		public override void FinalizeAgent()
 		{
+
 		}
 
 		public override void FinalizeGame()
 		{
+
 		}
 
 		public override PlayerTask GetMove(POGame.POGame poGame)
@@ -45,10 +48,12 @@ namespace SabberStoneCoreAi.src.Agent
 
 		public override void InitializeAgent()
 		{
+
 		}
 
 		public override void InitializeGame()
 		{
+
 		}
 
 		#region Helpers
@@ -56,6 +61,8 @@ namespace SabberStoneCoreAi.src.Agent
 		private float ScoreGame(POGame.POGame game, int playerId)
 		{
 			float result = 0;
+			Controller player = game.CurrentPlayer.PlayerId == playerId ? game.CurrentPlayer : game.CurrentOpponent;
+			Controller enemy = game.CurrentPlayer.PlayerId == playerId ? game.CurrentOpponent : game.CurrentPlayer;
 
 			return result;
 		}
