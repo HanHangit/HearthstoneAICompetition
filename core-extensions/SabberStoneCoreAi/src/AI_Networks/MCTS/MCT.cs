@@ -95,22 +95,17 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 				while (simNode.State.Game.State != SabberStoneCore.Enums.State.COMPLETE)
 				{
-					if (simNode.State.Game.CurrentPlayer.PlayerId != playerID)
-					{
-						foreach (var item in simNode.State.Game.CurrentPlayer.HandZone)
-						{
-							item.Card = Decks.RenoKazakusMage[rnd.Next(Decks.RenoKazakusMage.Count)];
-						}
-					}
-					else
-					{
-
-					}
+					//if (simNode.State.Game.CurrentPlayer.PlayerId != playerID)
+					//{
+					//	foreach (var item in simNode.State.Game.CurrentPlayer.HandZone)
+					//	{
+					//		item.Card = Decks.RenoKazakusMage[rnd.Next(Decks.RenoKazakusMage.Count)];
+					//	}
+					//}
 
 					try
 					{
 						simNode.State.RandomPlay();
-						//simNode.State.Game.FullPrint();
 					}
 					catch (Exception)
 					{
