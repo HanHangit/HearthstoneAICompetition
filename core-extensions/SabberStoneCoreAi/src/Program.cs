@@ -53,7 +53,6 @@ namespace SabberStoneCoreAi
 			Random rnd = new Random(Guid.NewGuid().GetHashCode());
 
 
-			var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws: false);
 
 			Console.WriteLine("Simulate Games");
 			//gameHandler.PlayGame(debug: true);
@@ -65,6 +64,7 @@ namespace SabberStoneCoreAi
 				Consts.PlayerHeroHealth = (float)rnd.NextDouble() * 100;
 				Consts.PlayerMinionAttack = (float)rnd.NextDouble() * 100;
 				Consts.PlayerMinionHealth = (float)rnd.NextDouble() * 100;
+				var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws: false);
 				gameHandler.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
 				GameStats gameStats = gameHandler.getGameStats();
 				Console.WriteLine(Consts.EnemyHeroHealth);
