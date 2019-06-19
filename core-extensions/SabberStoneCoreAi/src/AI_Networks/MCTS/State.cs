@@ -48,7 +48,14 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			var result = new List<State>();
 
 			Controller player = Game.CurrentPlayer;
-			var validOpts = Game.Simulate(player.Options()).Where(x => x.Value != null);
+			List<PlayerTask> playerTasks = player.Options();
+			var validOpts = Game.Simulate(playerTasks).Where(x => x.Value != null).ToList();
+
+			if(validOpts.Count() > 1)
+			{
+				PlayerTask t = playerTasks.Find(x => x.PlayerTaskType == PlayerTaskType.END_TURN);
+				validOpts.RemoveAll(n => n.Key == t);
+			}
 
 			foreach (KeyValuePair<PlayerTask, POGame.POGame> item in validOpts)
 			{

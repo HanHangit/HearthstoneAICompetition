@@ -13,7 +13,7 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			if (nodeVisit == 0)
 				result = Int32.MaxValue;
 			else
-				result = nodeWinScore + 2 * Math.Sqrt(Math.Log(totalVisit) / nodeVisit);
+				result = nodeWinScore + 1.41f * Math.Sqrt(Math.Log(totalVisit) / nodeVisit);
 
 			return result;
 		}

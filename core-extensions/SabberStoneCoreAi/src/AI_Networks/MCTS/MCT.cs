@@ -52,7 +52,7 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			//}
 			Console.ForegroundColor = ConsoleColor.Cyan;
 			foreach (Node item in bestMoves)
-				Console.WriteLine($"[{item.State.VisitCount}] - {item.State.LastMoves.First()}");
+				Console.WriteLine($"[{item.State.WinScore}] - {item.State.LastMoves.First()}");
 			Console.ResetColor();
 
 			//Console.ReadLine();
@@ -91,7 +91,7 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 		{
 			double result = 0;
 			var simNode = new Node(node);
-			int wins = 0;
+			float wins = 0;
 
 			for (int i = 0; i < NUM_GAMES; i++)
 			{
@@ -108,8 +108,13 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 						break;
 					}
 				}
-				if (simNode.State.Game.State == SabberStoneCore.Enums.State.COMPLETE
+				if (simNode.State.Game.CurrentPlayer.PlayState == SabberStoneCore.Enums.PlayState.WON
 					&& node.State.Game.CurrentPlayer.PlayerId == playerID)
+				{
+					wins++;
+				}
+				else if (simNode.State.Game.CurrentOpponent.PlayState == SabberStoneCore.Enums.PlayState.WON
+						&& node.State.Game.CurrentOpponent.PlayerId == playerID)
 				{
 					wins++;
 				}
