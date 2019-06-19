@@ -51,8 +51,8 @@ namespace SabberStoneCoreAi
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws: false);
 
 			Console.WriteLine("Simulate Games");
-			gameHandler.PlayGame(debug: true);
-			//gameHandler.PlayGames(nr_of_games:30, addResultToGameStats:true, debug:false);
+			//gameHandler.PlayGame(debug: true);
+			gameHandler.PlayGames(nr_of_games:100, addResultToGameStats:true, debug:false);
 			GameStats gameStats = gameHandler.getGameStats();
 			
 

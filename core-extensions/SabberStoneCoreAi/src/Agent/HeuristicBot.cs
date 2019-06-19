@@ -2,6 +2,7 @@
 using SabberStoneCore.Tasks.PlayerTasks;
 using SabberStoneCoreAi.Agent;
 using SabberStoneCoreAi.POGame;
+using SabberStoneCoreAi.src.AI_Networks.MCTS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,10 +37,10 @@ namespace SabberStoneCoreAi.src.Agent
 
 			scoreTasks = scoreTasks.OrderByDescending(x => x.Item2).ToList();
 
-			Console.ForegroundColor = ConsoleColor.Cyan;
-			foreach (var item in scoreTasks)
-				Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
-			Console.ResetColor();
+			//Console.ForegroundColor = ConsoleColor.Cyan;
+			//foreach (var item in scoreTasks)
+			//	Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
+			//Console.ResetColor();
 
 			result = scoreTasks.First().Item1;
 
@@ -63,6 +64,34 @@ namespace SabberStoneCoreAi.src.Agent
 			float result = 0;
 			Controller player = game.CurrentPlayer.PlayerId == playerId ? game.CurrentPlayer : game.CurrentOpponent;
 			Controller enemy = game.CurrentPlayer.PlayerId == playerId ? game.CurrentOpponent : game.CurrentPlayer;
+
+			result += player.Hero.Health * Consts.PlayerHeroHealth;
+			result -= enemy.Hero.Health * Consts.EnemyHeroHealth;
+
+			result += MinionAttackOnBoard(player) * Consts.PlayerMinionAttack;
+			result += MinionHealthOnBoard(player) * Consts.PlayerMinionHealth;
+			result -= MinionAttackOnBoard(enemy) * Consts.EnemyMinionAttack;
+			result -= MinionHealthOnBoard(enemy) * Consts.EnemyMinionHealth;
+
+			return result;
+		}
+
+		private int MinionAttackOnBoard(Controller ctrl)
+		{
+			int result = 0;
+
+			foreach (var item in ctrl.BoardZone)
+				result += item.AttackDamage;
+
+			return result;
+		}
+
+		private int MinionHealthOnBoard(Controller ctrl)
+		{
+			int result = 0;
+
+			foreach (var item in ctrl.BoardZone)
+				result += item.Health;
 
 			return result;
 		}
