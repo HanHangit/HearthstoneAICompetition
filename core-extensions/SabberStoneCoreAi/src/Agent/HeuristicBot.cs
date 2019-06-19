@@ -26,10 +26,17 @@ namespace SabberStoneCoreAi.src.Agent
 
 			List<(PlayerTask, float)> scoreTasks = new List<(PlayerTask, float)>();
 
-			foreach (var item in allTasks)
-				scoreTasks.Add((item, ScoreTask(item, poGame)));
+			var simGames = poGame.Simulate(allTasks).Where(x => x.Value != null);
 
-			scoreTasks.OrderByDescending(x => x.Item2);
+			foreach (var item in simGames)
+				scoreTasks.Add((item.Key, ScoreGame(item.Value, poGame.CurrentPlayer.PlayerId)));
+
+			scoreTasks = scoreTasks.OrderByDescending(x => x.Item2).ToList();
+
+			Console.ForegroundColor = ConsoleColor.Cyan;
+			foreach (var item in scoreTasks)
+				Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
+			Console.ResetColor();
 
 			result = scoreTasks.First().Item1;
 
@@ -46,30 +53,9 @@ namespace SabberStoneCoreAi.src.Agent
 
 		#region Helpers
 
-		private float ScoreTask(PlayerTask task, POGame.POGame game)
+		private float ScoreGame(POGame.POGame game, int playerId)
 		{
 			float result = 0;
-
-			switch (task)
-			{
-				case PlayerTask t when task.PlayerTaskType == PlayerTaskType.PLAY_CARD:
-					result = ScorePlayTask(task, game);
-					break;
-				case PlayerTask t when task.PlayerTaskType == PlayerTaskType.PLAY_CARD:
-					result = ScorePlayTask(task, game);
-					break;
-				default:
-					break;
-			}
-
-			return result;
-		}
-
-		private float ScorePlayTask(PlayerTask task, POGame.POGame game)
-		{
-			float result = 0;
-
-
 
 			return result;
 		}
