@@ -22,6 +22,7 @@ using SabberStoneCoreAi.Agent.ExampleAgents;
 using SabberStoneCoreAi.Agent;
 using SabberStoneCoreAi.src.Agent;
 using SabberStoneCoreAi.Meta;
+using SabberStoneCoreAi.src.AI_Networks.MCTS;
 
 namespace SabberStoneCoreAi
 {
@@ -48,15 +49,34 @@ namespace SabberStoneCoreAi
 			Console.WriteLine("Setup POGameHandler");
 			AbstractAgent player1 = new GreedyAgent();
 			AbstractAgent player2 = new HeuristicBot();
+
+			Random rnd = new Random(Guid.NewGuid().GetHashCode());
+
+
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, repeatDraws: false);
 
 			Console.WriteLine("Simulate Games");
 			//gameHandler.PlayGame(debug: true);
-			gameHandler.PlayGames(nr_of_games:100, addResultToGameStats:true, debug:false);
-			GameStats gameStats = gameHandler.getGameStats();
-			
+			for (int i = 0; i < 100; i++)
+			{
+				Consts.EnemyHeroHealth = (float)rnd.NextDouble() * 100;
+				Consts.EnemyMinionAttack = (float)rnd.NextDouble() * 100;
+				Consts.EnemyMinionHealth = (float)rnd.NextDouble() * 100;
+				Consts.PlayerHeroHealth = (float)rnd.NextDouble() * 100;
+				Consts.PlayerMinionAttack = (float)rnd.NextDouble() * 100;
+				Consts.PlayerMinionHealth = (float)rnd.NextDouble() * 100;
+				gameHandler.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
+				GameStats gameStats = gameHandler.getGameStats();
+				Console.WriteLine(Consts.EnemyHeroHealth);
+				Console.WriteLine(Consts.EnemyMinionAttack);
+				Console.WriteLine(Consts.EnemyMinionHealth);
+				Console.WriteLine(Consts.PlayerHeroHealth);
+				Console.WriteLine(Consts.PlayerMinionAttack);
+				Console.WriteLine(Consts.PlayerMinionHealth);
+				gameStats.printResults();
+			}
 
-			gameStats.printResults();
+
 
 			Console.ReadLine();
 		}

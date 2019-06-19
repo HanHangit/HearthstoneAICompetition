@@ -6,11 +6,14 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 {
 	class Consts
 	{
-		public const float PlayerMinionAttack = 1;
-		public const float PlayerMinionHealth = 1;
-		public const float PlayerHeroHealth = 1;
-		public const float EnemyMinionAttack = 1;
-		public const float EnemyMinionHealth = 1;
-		public const float EnemyHeroHealth = 1;
+		public static float PlayerMinionAttack = 1f;
+		public static float PlayerMinionHealth = 1;
+		public static float PlayerHeroHealth = 1;
+		public static float EnemyMinionAttack = 1f;
+		public static float EnemyMinionHealth =1;
+		public static float EnemyHeroHealth = 1f;
+
+
+		public static int values = 6;
 	}
 }
