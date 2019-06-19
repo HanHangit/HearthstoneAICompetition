@@ -18,26 +18,29 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 		public double WinScore => WinAmount / (float)AmountGames;
 		public int WinAmount { get; set; }
 		public int AmountGames { get; set; }
-		public List<PlayerTask> LastMoves { get; set; }
+		public List<string> LastMoves { get; set; }
+		public PlayerTask LastMove { get; set; }
 		public bool Simulated { get; set; } = false;
 
-		public State(POGame.POGame game, List<PlayerTask> lastMoves)
+		public State(POGame.POGame game, List<string> lastMoves, PlayerTask lastMove = null)
 		{
 			LastMoves = lastMoves;
-			Game = game.getCopy(false);
-			//if (LastMoves != null)
-			//	foreach (PlayerTask item in lastMoves)
-			//		Game.Process(item);
+			Game = game;
 			VisitCount = 0;
+			LastMove = lastMove;
 		}
 
 		public State(State other)
 		{
-			LastMoves = other.LastMoves;
+			LastMoves = new List<string>();
+			foreach (var item in other.LastMoves)
+				LastMoves.Add(item);
+
 			Game = other.Game.getCopy(false);
 			VisitCount = other.VisitCount;
 			AmountGames = other.AmountGames;
 			WinAmount = other.WinAmount;
+			LastMove = other.LastMove;
 		}
 
 		public List<State> GetAllPossibleStates()
@@ -49,12 +52,11 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 			foreach (KeyValuePair<PlayerTask, POGame.POGame> item in validOpts)
 			{
-				var newPlayerTasks = new List<PlayerTask>();
+				var newPlayerTasks = new List<string>();
 				if (LastMoves != null)
 					newPlayerTasks.AddRange(LastMoves);
-				newPlayerTasks.Add(item.Key);
-
-				result.Add(new State(item.Value, newPlayerTasks));
+				newPlayerTasks.Add(item.Key.ToString());
+				result.Add(new State(item.Value, newPlayerTasks, item.Key));
 			}
 
 			return result;
@@ -63,21 +65,43 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 		public void RandomPlay()
 		{
 			List<PlayerTask> playerTasks = Game.CurrentPlayer.Options();
-			PlayerTask currPlayerTask = null;
+			List<(PlayerTask, float)> tasks = new List<(PlayerTask, float)>();
 
-			//playerTasks.RemoveAll(x => x.Source?.Card.Id == "LOEA04_31b");
-			currPlayerTask = playerTasks[rnd.Next(playerTasks.Count)];
-
-			try
+			foreach (var item in playerTasks)
 			{
-				Game.Process(currPlayerTask);
-			}
-			catch (Exception ex)
-			{
-
-				throw;
+				tasks.Add((item, ScoreTask(item)));
 			}
 
+			var res = tasks.OrderByDescending(x => x.Item2);
+
+			Game.Process(playerTasks[rnd.Next(playerTasks.Count)]/*res.First().Item1*/);
+		}
+
+		private float ScoreTask(PlayerTask task)
+		{
+			float result = 0;
+
+			if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK)
+			{
+				result += rnd.Next(1, 5);
+
+				if (task.Target.Health <= task.Source.Card.ATK)
+				{
+					result += 10;
+					if (task.Source.Card.Health > task.Target.AttackDamage)
+						result += 30;
+				}
+			}
+
+			if (task.PlayerTaskType == PlayerTaskType.PLAY_CARD)
+			{
+				result += rnd.Next(1, 3);
+			}
+
+			if (task.PlayerTaskType == PlayerTaskType.END_TURN)
+				result += -1000;
+
+			return result;
 		}
 	}
 }

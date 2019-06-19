@@ -1,5 +1,7 @@
-﻿using SabberStoneCore.Model.Entities;
+﻿using SabberStoneCore.Model;
+using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
+using SabberStoneCoreAi.Meta;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,8 +17,6 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 		private readonly int NUM_GAMES = 1;
 		private readonly Random rnd = new Random();
 		private double MAX_VALUE = 0;
-		private int globalWin = 0;
-		private int globalGames = 0;
 
 		public PlayerTask FindNextMove(POGame.POGame game)
 		{
@@ -30,8 +30,6 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			//foreach (Node item in rootNode.Children)
 			//	Console.WriteLine($"{item.State.LastMoves.First()}");
 			//Console.ResetColor();
-			globalGames = 0;
-			globalWin = 0;
 
 			var watch = new Stopwatch();
 			watch.Start();
@@ -47,19 +45,16 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 				BackPropagation(nextNode, playResult);
 			}
 
-			var bestMoves = rootNode.Children.OrderByDescending(n => n.State.WinScore / n.State.VisitCount).ToList();
+			var bestMoves = rootNode.Children.OrderByDescending(n => n.State.WinScore).ToList();
 			Console.ForegroundColor = ConsoleColor.Cyan;
 			foreach (Node item in bestMoves)
 				Console.WriteLine($"[{item.State.WinScore}] - {item.State.LastMoves.First()}");
 			Console.ResetColor();
 
-			Console.WriteLine(globalWin);
-			Console.WriteLine(globalGames);
-
 			//Console.ReadLine();
 			Node winnerNode = bestMoves.First();
 			tree.Root = winnerNode;
-			result = winnerNode.State.LastMoves.First();
+			result = winnerNode.State.LastMove;
 
 			return result;
 		}
@@ -100,9 +95,22 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 				while (simNode.State.Game.State != SabberStoneCore.Enums.State.COMPLETE)
 				{
+					if (simNode.State.Game.CurrentPlayer.PlayerId != playerID)
+					{
+						foreach (var item in simNode.State.Game.CurrentPlayer.HandZone)
+						{
+							item.Card = Decks.RenoKazakusMage[rnd.Next(Decks.RenoKazakusMage.Count)];
+						}
+					}
+					else
+					{
+
+					}
+
 					try
 					{
 						simNode.State.RandomPlay();
+						//simNode.State.Game.FullPrint();
 					}
 					catch (Exception)
 					{
@@ -115,9 +123,6 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 					wins++;
 				}
 			}
-
-			globalWin += wins;
-			globalGames += NUM_GAMES;
 			result = wins;
 
 			Controller simEnemy = simNode.State.Game.CurrentPlayer.PlayerId == playerID ? simNode.State.Game.CurrentOpponent : simNode.State.Game.CurrentPlayer;

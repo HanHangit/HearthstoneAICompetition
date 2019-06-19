@@ -21,6 +21,7 @@ using SabberStoneCoreAi.POGame;
 using SabberStoneCoreAi.Agent.ExampleAgents;
 using SabberStoneCoreAi.Agent;
 using SabberStoneCoreAi.src.Agent;
+using SabberStoneCoreAi.Meta;
 
 namespace SabberStoneCoreAi
 {
@@ -36,6 +37,8 @@ namespace SabberStoneCoreAi
 				StartPlayer = 1,
 				Player1HeroClass = CardClass.DRUID,
 				Player2HeroClass = CardClass.MAGE,
+				Player1Deck = Decks.MidrangeJadeShaman,
+				Player2Deck = Decks.RenoKazakusMage,
 				FillDecks = true,
 				Shuffle = true,
 				Logging = false,
@@ -49,7 +52,7 @@ namespace SabberStoneCoreAi
 
 			Console.WriteLine("Simulate Games");
 			gameHandler.PlayGame(debug: true);
-			//gameHandler.PlayGames(nr_of_games:3, addResultToGameStats:true, debug:false);
+			//gameHandler.PlayGames(nr_of_games:30, addResultToGameStats:true, debug:false);
 			GameStats gameStats = gameHandler.getGameStats();
 			
 

@@ -10,7 +10,7 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 		public Tree(POGame.POGame game)
 		{
-			Root = new Node(new State(game, null));
+			Root = new Node(new State(game.getCopy(false), null));
 		}
 
 	}

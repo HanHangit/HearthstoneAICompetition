@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SabberStoneCore.Tasks.PlayerTasks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,12 +18,12 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 
 		public Node(State state)
 		{
-			State = new State(state);
+			State = state;
 			Children = new List<Node>();
 			IsLeaf = state.Game.State != SabberStoneCore.Enums.State.RUNNING;
 		}
 
-		public Node(Node other) : this(other.State)
+		public Node(Node other) : this(new State(other.State))
 		{
 			if (other.Parent != null)
 				Parent = other.Parent;
@@ -37,20 +38,16 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			List<State> possibleStates = State.GetAllPossibleStates();
 			Node result = null;
 
-			//--Entfernt alle Nachfolger, die schon vorhanden sind--//
 			if (!FullyExpanded && !IsLeaf)
 			{
+				//--Entfernt alle Nachfolger, die schon vorhanden sind--//
 				possibleStates.RemoveAll(x => Children.Any(n => n.State.LastMoves.Last().ToString() == x.LastMoves.Last().ToString()));
-				if (possibleStates.Count == 0)
-				{
-
-				}
 				result = new Node(possibleStates[_rnd.Next(possibleStates.Count())]);
 				result.Parent = this;
 				Children.Add(result);
 
 				if (possibleStates.Count == 1)
-					FullyExpanded = true; 
+					FullyExpanded = true;
 			}
 
 			return result;
@@ -66,9 +63,9 @@ namespace SabberStoneCoreAi.src.AI_Networks.MCTS
 			{
 				result = new Node(item);
 				result.Parent = this;
-				Children.Add(result); 
+				Children.Add(result);
 			}
-			
+
 			FullyExpanded = true;
 			return result;
 		}
