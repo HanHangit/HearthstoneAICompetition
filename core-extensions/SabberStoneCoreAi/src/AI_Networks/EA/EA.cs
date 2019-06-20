@@ -216,7 +216,7 @@ namespace SabberStoneCoreAi.src.AI_Networks.EA
 			foreach (var player1 in pop)
 			{
 				AbstractAgent agent1 = new GreedyAgent();
-				AbstractAgent agent2 = new HeuristicBot(player1);
+				AbstractAgent agent2 = new KISSBot();
 
 				Random rnd = new Random(Guid.NewGuid().GetHashCode());
 

@@ -12,13 +12,11 @@ using System.Text;
 
 namespace SabberStoneCoreAi.src.Agent
 {
-	class HeuristicBot : AbstractAgent
+	class KISSBot : AbstractAgent
 	{
-		private double[] _values;
 
-		public HeuristicBot(double[] values)
+		public KISSBot()
 		{
-			_values = values;
 		}
 
 		public override void FinalizeAgent()
@@ -44,19 +42,19 @@ namespace SabberStoneCoreAi.src.Agent
 			var deleted = origSimGames.Where(x => x.Value == null);
 
 			foreach (var item in simGames)
-				scoreTasks.Add((item.Key, ScoreGame(item.Key, item.Value, poGame.CurrentPlayer.PlayerId)));
+				scoreTasks.Add((item.Key, item.Key.PlayerTaskType != PlayerTaskType.END_TURN ? ScoreGame(item.Key, item.Value, poGame.CurrentPlayer.PlayerId) : ScoreGame(item.Key, poGame, poGame.CurrentPlayer.PlayerId)));
 
 			scoreTasks = scoreTasks.OrderByDescending(x => x.Item2).ToList();
 
 			//Console.ForegroundColor = ConsoleColor.DarkYellow;
 			//foreach (var item in deleted)
 			//	Console.WriteLine($" {item.Key.ToString()}");
-			//Console.ResetColor();
+			////Console.ResetColor();
 
-			Console.ForegroundColor = ConsoleColor.Cyan;
-			foreach (var item in scoreTasks)
-				Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
-			Console.ResetColor();
+			//Console.ForegroundColor = ConsoleColor.Cyan;
+			//foreach (var item in scoreTasks)
+			//	Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
+			//Console.ResetColor();
 
 			if (scoreTasks.Any())
 				result = scoreTasks.First().Item1;
@@ -80,66 +78,58 @@ namespace SabberStoneCoreAi.src.Agent
 
 		private double ScoreGame(PlayerTask task, POGame.POGame game, int playerId)
 		{
-			double result = 1000;
+			double result = 0;
 			Controller player = game.CurrentPlayer.PlayerId == playerId ? game.CurrentPlayer : game.CurrentOpponent;
 			Controller enemy = game.CurrentPlayer.PlayerId == playerId ? game.CurrentOpponent : game.CurrentPlayer;
-
-			//if (task.HasTarget &&
-			//	(task.Target.Card.Name.Contains("Flametongue") || task.Target.Card.Name.Contains("Wrath of Air Totem")))
-			//	result += 1;
-
-			//if (task.PlayerTaskType == PlayerTaskType.HERO_ATTACK)
-			//	result += 100;
-
-			//if (task.HasSource && task.Source.Card.Name.Contains("Coin"))
-			//	result += CoinValue(game, player);
-			//if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL
-			//	&& task.HasTarget && task.Target.Health > 10)
-			//	result -= 5;
-
-			//if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
-			//{
-			//	result += SpellOnMinion(task, game, player);
-			//	//if (task.HasTarget && (task.Target.Health >= 5 || task.Target.HasTaunt))
-			//	//	result += 100;
-			//}
-
-			//if(task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.MINION)
-			//{
-			//	result += (10 - task.Source.Cost) * 10;
-			//}
-
-			//if(!task.HasTarget && task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
-			//{
-			//	result += enemy.BoardZone.Count() > 2 ? 100 : 0;
-			//}
-
-
 
 			if (task.HasSource)
 			{
 				Card card = task.Source.Card;
-				if (card.Type == SabberStoneCore.Enums.CardType.SPELL)
+				if (task.HasTarget)
 				{
-					if (task.HasTarget)
+					ICharacter minion = task.Target;
+					if (card.Type == SabberStoneCore.Enums.CardType.SPELL)
 					{
-						ICharacter minion = task.Target;
 						if (enemy.BoardZone.Contains(minion))
 						{
 							if (card.ATK == task.Target.Health)
 							{
 								result += task.Target.AttackDamage;
-							} 
+							}
+							else if (card.ATK == 0)
+							{
+								result += task.Target.AttackDamage * 3;
+								result += task.Target.Health * 3;
+							}
+						}
+					}
+
+					if (card.Type == SabberStoneCore.Enums.CardType.MINION)
+					{
+						if (card.Health <= 0)
+						{
+							result += minion.Cost - card.Cost;
 						}
 					}
 				}
+				else
+				{
+					if (card.Type == SabberStoneCore.Enums.CardType.SPELL)
+					{
+						if (enemy.BoardZone.Count < 3)
+							result -= 3;
+					}
+				}
+
+				if (task.PlayerTaskType == PlayerTaskType.HERO_ATTACK && task.Target.Health > 5)
+					result -= 10;
 
 				if (card.Name.Contains("Coin"))
 				{
 					foreach (var item in player.HandZone)
 					{
-						if (item.Card.Type == SabberStoneCore.Enums.CardType.MINION && item.Cost == player.RemainingMana)
-							result += 100000;							
+						if ((item.Card.Type == SabberStoneCore.Enums.CardType.MINION || item.Card.Type == SabberStoneCore.Enums.CardType.WEAPON) && item.Cost == player.RemainingMana)
+							result += 100000;
 					}
 				}
 			}
@@ -149,17 +139,12 @@ namespace SabberStoneCoreAi.src.Agent
 
 			result += HeroWeapon(task, game, player);
 
+			result -= enemy.BoardZone.Count() * 6;
 
-			//result += MinionTaunt(task, game, player);
-			result += MinionTaunt(task, game, enemy);
-
-			result += MinionAttackOnBoard(player);
-			result += MinionHealthOnBoard(player);
-			result -= MinionAttackOnBoard(enemy);
-			result -= MinionHealthOnBoard(enemy);
-
-			//if (MinionAttackOnBoard(enemy) == 0)
-			//	result += 10;
+			result += MinionAttackOnBoard(player) * 1.1f;
+			result += MinionHealthOnBoard(player) * 1.1f;
+			result -= MinionAttackOnBoard(enemy) * 1.1f;
+			result -= MinionHealthOnBoard(enemy) * 1.1f;
 
 			if (CanDefeatEnemyHeroWithMinions(player, enemy, canAttack: false) && task.HasTarget && task.Target.Card.Type == SabberStoneCore.Enums.CardType.HERO)
 				result += 10000;
@@ -173,63 +158,7 @@ namespace SabberStoneCoreAi.src.Agent
 		{
 			float result = 0;
 
-			result += ctrl.Hero.AttackDamage;
-
-			return result;
-		}
-
-		private float MinionTaunt(PlayerTask task, POGame.POGame game, Controller ctrl)
-		{
-			float result = 0;
-
-			foreach (var item in ctrl.BoardZone)
-				if (item.HasTaunt)
-					result -= 100;
-
-			return result;
-		}
-
-		private float SpellOnMinion(PlayerTask task, POGame.POGame game, Controller ctrl)
-		{
-			float result = 0;
-
-			if (task.HasTarget)
-			{
-				if (task.Target.Health == task.Source.Card.ATK)
-					result += 20;
-				else if (task.Target.Health == task.Source.Card.ATK - 1)
-					result += 5;
-				else if (!task.Source.Card.Name.Contains("Hex"))
-					result -= 100;
-			}
-
-			return result;
-		}
-
-		private bool SpellWithValue(POGame.POGame game, Controller ctrl, int mana)
-		{
-			bool result = false;
-
-			foreach (var item in ctrl.HandZone)
-			{
-				if ((item.Card.Type == SabberStoneCore.Enums.CardType.SPELL || item.Card.Type == SabberStoneCore.Enums.CardType.WEAPON) && item.Cost == mana)
-					result = true;
-			}
-
-			return result;
-		}
-
-		private float CoinValue(POGame.POGame game, Controller ctrl)
-		{
-			float result = -100;
-
-			int mana = ctrl.RemainingMana;
-
-			if (MinionWithMana(ctrl, mana) != -10)
-				result = 100;
-
-			if (SpellWithValue(game, ctrl, mana))
-				result = 100;
+			result += ctrl.Hero.AttackDamage * 0.2f;
 
 			return result;
 		}
