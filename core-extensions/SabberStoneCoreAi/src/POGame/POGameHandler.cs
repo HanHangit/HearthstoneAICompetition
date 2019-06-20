@@ -110,7 +110,7 @@ namespace SabberStoneCoreAi.POGame
 			for (int i = 0; i < nr_of_games; i++)
 			{
 				if (!PlayGame(addResultToGameStats, debug))
-					i -= 1;		// invalid game
+					i -= 1;     // invalid game
 				pb.Update(i);
 			}
 			Console.WriteLine();

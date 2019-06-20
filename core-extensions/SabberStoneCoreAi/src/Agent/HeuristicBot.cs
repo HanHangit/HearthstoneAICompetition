@@ -13,6 +13,13 @@ namespace SabberStoneCoreAi.src.Agent
 {
 	class HeuristicBot : AbstractAgent
 	{
+		private double[] _values;
+
+		public HeuristicBot(double[] values)
+		{
+			_values = values;
+		}
+
 		public override void FinalizeAgent()
 		{
 
@@ -29,12 +36,12 @@ namespace SabberStoneCoreAi.src.Agent
 
 			List<PlayerTask> allTasks = poGame.CurrentPlayer.Options();
 
-			List<(PlayerTask, float)> scoreTasks = new List<(PlayerTask, float)>();
+			List<(PlayerTask, double)> scoreTasks = new List<(PlayerTask, double)>();
 
 			var simGames = poGame.Simulate(allTasks).Where(x => x.Value != null);
 
 			foreach (var item in simGames)
-				scoreTasks.Add((item.Key, ScoreGame(item.Value, poGame.CurrentPlayer.PlayerId)));
+				scoreTasks.Add((item.Key, ScoreGame(item.Key, item.Value, poGame.CurrentPlayer.PlayerId)));
 
 			scoreTasks = scoreTasks.OrderByDescending(x => x.Item2).ToList();
 
@@ -43,7 +50,10 @@ namespace SabberStoneCoreAi.src.Agent
 			//	Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
 			//Console.ResetColor();
 
-			result = scoreTasks.First().Item1;
+			if (scoreTasks.Any())
+				result = scoreTasks.First().Item1;
+			else
+				result = allTasks.First(x => x.PlayerTaskType == PlayerTaskType.END_TURN);
 
 			return result;
 		}
@@ -60,28 +70,85 @@ namespace SabberStoneCoreAi.src.Agent
 
 		#region Helpers
 
-		private float ScoreGame(POGame.POGame game, int playerId)
+		private double ScoreGame(PlayerTask task, POGame.POGame game, int playerId)
 		{
-			float result = 0;
+			double result = 0;
 			Controller player = game.CurrentPlayer.PlayerId == playerId ? game.CurrentPlayer : game.CurrentOpponent;
 			Controller enemy = game.CurrentPlayer.PlayerId == playerId ? game.CurrentOpponent : game.CurrentPlayer;
 
-			result += player.Hero.Health * Consts.PlayerHeroHealth;
-			result -= enemy.Hero.Health * Consts.EnemyHeroHealth;
+			if (task.HasSource && task.Source.Card.Name.Contains("Coin"))
+				result += CoinValue(game, player);
+			if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL
+				&& task.HasTarget && task.Target.Health > 10)
+				result -= 5;
 
-			result += MinionAttackOnBoard(player) * Consts.PlayerMinionAttack;
-			result += MinionHealthOnBoard(player) * Consts.PlayerMinionHealth;
-			result -= MinionAttackOnBoard(enemy) * Consts.EnemyMinionAttack;
-			result -= MinionHealthOnBoard(enemy) * Consts.EnemyMinionHealth;
+			if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
+				result += SpellOnMinion(task, game, player);
 
-			result += CanDefeatEnemyHeroWithMinions(player, enemy, true) ? 10000 : 0;
+			result += player.Hero.Health;
+			result -= enemy.Hero.Health;
+
+			result += MinionAttackOnBoard(player);
+			result += MinionHealthOnBoard(player);
+			result -= MinionAttackOnBoard(enemy) * 2;
+			result -= MinionHealthOnBoard(enemy) * 2;
+			result += player.Hero.AttackDamage;
+
+			if (MinionAttackOnBoard(enemy) == 0)
+				result += 10;
+
+			if (CanDefeatEnemyHeroWithMinions(player, enemy, canAttack: false) && task.HasTarget && task.Target.Card.Type == SabberStoneCore.Enums.CardType.HERO)
+				result += 10000;
+			else if (CanDefeatEnemyHeroWithMinions(enemy, player))
+				result -= 10000;
 
 			return result;
 		}
 
-		private int MinionAttackOnBoard(Controller ctrl)
+		private float SpellOnMinion(PlayerTask task, POGame.POGame game, Controller ctrl)
 		{
-			int result = 0;
+			float result = 0;
+
+			if (task.HasTarget)
+			{
+				if (task.Target.Health == task.Source.Card.ATK)
+					result += 20;
+				else if (task.Target.Health == task.Source.Card.ATK - 1)
+					result += 5;
+				else
+					result -= 100;
+			}
+
+			return result;
+		}
+
+		private float CoinValue(POGame.POGame game, Controller ctrl)
+		{
+			float result = 0;
+
+			int mana = ctrl.RemainingMana + 1;
+
+			result += MinionWithMana(ctrl, mana) * 3;
+
+			return result;
+		}
+
+		private int MinionWithMana(Controller ctrl, int mana)
+		{
+			int result = -10;
+
+			foreach (var item in ctrl.HandZone)
+			{
+				if (item.Card.Type == SabberStoneCore.Enums.CardType.MINION && item.Card.Cost == mana)
+					result = 1;
+			}
+
+			return result;
+		}
+
+		private double MinionAttackOnBoard(Controller ctrl)
+		{
+			double result = 0;
 
 			foreach (var item in ctrl.BoardZone)
 				result += item.AttackDamage;
@@ -89,9 +156,9 @@ namespace SabberStoneCoreAi.src.Agent
 			return result;
 		}
 
-		private int MinionHealthOnBoard(Controller ctrl)
+		private double MinionHealthOnBoard(Controller ctrl)
 		{
-			int result = 0;
+			double result = 0;
 
 			foreach (var item in ctrl.BoardZone)
 				result += item.Health;
@@ -99,14 +166,14 @@ namespace SabberStoneCoreAi.src.Agent
 			return result;
 		}
 
-		public bool CanDefeatEnemyHeroWithMinions(Controller player, Controller enemy, bool withSpell = true)
+		public bool CanDefeatEnemyHeroWithMinions(Controller player, Controller enemy, bool withSpell = true, bool canAttack = true)
 		{
 			var damagePoints = 0;
 			if (withSpell)
 				damagePoints += MaxSpellDamage(player, enemy);
 			foreach (var item in player.BoardZone)
 			{
-				if (!item.CantAttackHeroes)
+				if (!item.CantAttackHeroes && (item.CanAttack || canAttack))
 				{
 					damagePoints += item.AttackDamage;
 					if (damagePoints >= enemy.Hero.Health)
