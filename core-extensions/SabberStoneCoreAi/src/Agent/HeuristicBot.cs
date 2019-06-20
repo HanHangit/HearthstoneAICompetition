@@ -53,10 +53,10 @@ namespace SabberStoneCoreAi.src.Agent
 			//	Console.WriteLine($" {item.Key.ToString()}");
 			//Console.ResetColor();
 
-			//Console.ForegroundColor = ConsoleColor.Cyan;
-			//foreach (var item in scoreTasks)
-			//	Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
-			//Console.ResetColor();
+			Console.ForegroundColor = ConsoleColor.Cyan;
+			foreach (var item in scoreTasks)
+				Console.WriteLine($"[{item.Item2}] " + item.Item1.ToString());
+			Console.ResetColor();
 
 			if (scoreTasks.Any())
 				result = scoreTasks.First().Item1;
@@ -113,6 +113,36 @@ namespace SabberStoneCoreAi.src.Agent
 			//{
 			//	result += enemy.BoardZone.Count() > 2 ? 100 : 0;
 			//}
+
+
+
+			if (task.HasSource)
+			{
+				Card card = task.Source.Card;
+				if (card.Type == SabberStoneCore.Enums.CardType.SPELL)
+				{
+					if (task.HasTarget)
+					{
+						ICharacter minion = task.Target;
+						if (enemy.BoardZone.Contains(minion))
+						{
+							if (card.ATK == task.Target.Health)
+							{
+								result += task.Target.AttackDamage;
+							} 
+						}
+					}
+				}
+
+				if (card.Name.Contains("Coin"))
+				{
+					foreach (var item in player.HandZone)
+					{
+						if (item.Card.Type == SabberStoneCore.Enums.CardType.MINION && item.Cost == player.RemainingMana)
+							result += 100000;							
+					}
+				}
+			}
 
 			result += player.Hero.Health;
 			result -= enemy.Hero.Health;
