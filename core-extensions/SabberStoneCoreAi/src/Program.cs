@@ -110,25 +110,25 @@ namespace SabberStoneCoreAi
 			var gameHandler21 = new POGameHandler(gameConfig2, player1, player2, repeatDraws: false);
 			var gameHandler3 = new POGameHandler(gameConfig3, player2, player1, repeatDraws: false);
 			var gameHandler31 = new POGameHandler(gameConfig3, player1, player2, repeatDraws: false);
-			gameHandler11.PlayGame(debug: true);
-			gameHandler11.getGameStats().printResults();
-			//gameHandler1.PlayGames(nr_of_games: 1000, addResultToGameStats: true, debug: false);
-			//gameHandler1.getGameStats().printResults();
-
-			//gameHandler11.PlayGames(nr_of_games: 1000, addResultToGameStats: true, debug: false);
+			//gameHandler11.PlayGame(debug: true);
 			//gameHandler11.getGameStats().printResults();
+			gameHandler1.PlayGames(nr_of_games: 1000, addResultToGameStats: true, debug: false);
+			gameHandler1.getGameStats().printResults();
 
-			//gameHandler2.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
-			//gameHandler2.getGameStats().printResults();
+			gameHandler11.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
+			gameHandler11.getGameStats().printResults();
 
-			//gameHandler21.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
-			//gameHandler21.getGameStats().printResults();
+			gameHandler2.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
+			gameHandler2.getGameStats().printResults();
 
-			//gameHandler3.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
-			//gameHandler3.getGameStats().printResults();
+			gameHandler21.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
+			gameHandler21.getGameStats().printResults();
 
-			//gameHandler31.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
-			//gameHandler31.getGameStats().printResults();
+			gameHandler3.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
+			gameHandler3.getGameStats().printResults();
+
+			gameHandler31.PlayGames(nr_of_games: 100, addResultToGameStats: true, debug: false);
+			gameHandler31.getGameStats().printResults();
 
 			Console.ReadLine();
 		}

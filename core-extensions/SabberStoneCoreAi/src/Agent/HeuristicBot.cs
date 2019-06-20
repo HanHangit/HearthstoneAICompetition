@@ -6,6 +6,7 @@ using SabberStoneCoreAi.POGame;
 using SabberStoneCoreAi.src.AI_Networks.MCTS;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -79,49 +80,53 @@ namespace SabberStoneCoreAi.src.Agent
 
 		private double ScoreGame(PlayerTask task, POGame.POGame game, int playerId)
 		{
-			double result = 0;
+			double result = 1000;
 			Controller player = game.CurrentPlayer.PlayerId == playerId ? game.CurrentPlayer : game.CurrentOpponent;
 			Controller enemy = game.CurrentPlayer.PlayerId == playerId ? game.CurrentOpponent : game.CurrentPlayer;
-					   
-			if (task.HasTarget &&
-				(task.Target.Card.Name.Contains("Flametongue") || task.Target.Card.Name.Contains("Wrath of Air Totem")))
-				result += 1;
+
+			//if (task.HasTarget &&
+			//	(task.Target.Card.Name.Contains("Flametongue") || task.Target.Card.Name.Contains("Wrath of Air Totem")))
+			//	result += 1;
 
 			//if (task.PlayerTaskType == PlayerTaskType.HERO_ATTACK)
 			//	result += 100;
 
-			if (task.HasSource && task.Source.Card.Name.Contains("Coin"))
-				result += CoinValue(game, player);
-			if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL
-				&& task.HasTarget && task.Target.Health > 10)
-				result -= 5;
+			//if (task.HasSource && task.Source.Card.Name.Contains("Coin"))
+			//	result += CoinValue(game, player);
+			//if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL
+			//	&& task.HasTarget && task.Target.Health > 10)
+			//	result -= 5;
 
-			if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
-				result += SpellOnMinion(task, game, player);
+			//if (task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
+			//{
+			//	result += SpellOnMinion(task, game, player);
+			//	//if (task.HasTarget && (task.Target.Health >= 5 || task.Target.HasTaunt))
+			//	//	result += 100;
+			//}
 
-			if(task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.MINION)
-			{
-				result += (10 - task.Source.Cost) * 10;
-			}
+			//if(task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.MINION)
+			//{
+			//	result += (10 - task.Source.Cost) * 10;
+			//}
 
-			if(!task.HasTarget && task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
-			{
-				result += enemy.BoardZone.Count() > 2 ? 100 : 0;
-			}
+			//if(!task.HasTarget && task.HasSource && task.Source.Card.Type == SabberStoneCore.Enums.CardType.SPELL)
+			//{
+			//	result += enemy.BoardZone.Count() > 2 ? 100 : 0;
+			//}
 
 			result += player.Hero.Health;
 			result -= enemy.Hero.Health;
 
-			result += HeroWeapon(task, game, player) * 10;
+			result += HeroWeapon(task, game, player);
 
 
 			//result += MinionTaunt(task, game, player);
 			result += MinionTaunt(task, game, enemy);
 
-			result += MinionAttackOnBoard(player) * 2;
-			result += MinionHealthOnBoard(player) * 2;
-			result -= MinionAttackOnBoard(enemy) * 2;
-			result -= MinionHealthOnBoard(enemy) * 2;
+			result += MinionAttackOnBoard(player);
+			result += MinionHealthOnBoard(player);
+			result -= MinionAttackOnBoard(enemy);
+			result -= MinionHealthOnBoard(enemy);
 
 			//if (MinionAttackOnBoard(enemy) == 0)
 			//	result += 10;
